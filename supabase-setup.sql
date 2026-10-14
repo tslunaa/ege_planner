@@ -23,6 +23,10 @@ drop trigger if exists students_touch on public.students;
 create trigger students_touch before update on public.students
   for each row execute function public.touch_updated_at();
 
+-- Доступ к таблице только для вошедшего репетитора (анонимные посетители таблицу не видят).
+revoke all on table public.students from anon;
+grant select, insert, update, delete on table public.students to authenticated;
+
 -- Репетитор видит и меняет только своих учениц.
 alter table public.students enable row level security;
 drop policy if exists "owner full access" on public.students;
