@@ -1124,7 +1124,7 @@ function loadScript(src) {
 (async function init() {
   try {
     if (CLOUD) {
-      await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.min.js');
       sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
       const { data } = await sb.auth.getSession();
       S.user = data.session?.user || null;
