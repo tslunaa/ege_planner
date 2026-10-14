@@ -1001,7 +1001,7 @@ const ACTS = {
   signup: async () => {
     const f = $('#loginForm'), msg = $('#loginMsg');
     if (!f.reportValidity()) return;
-    const { error, data } = await sb.auth.signUp({ email: f.email.value, password: f.password.value });
+    const { error, data } = await sb.auth.signUp({ email: f.email.value, password: f.password.value, options: { emailRedirectTo: location.origin + location.pathname } });
     msg.textContent = error ? 'Ошибка: ' + error.message : data.session ? '' : 'Аккаунт создан. Подтвердите почту по ссылке из письма, затем войдите.';
   },
 };
@@ -1080,6 +1080,19 @@ document.addEventListener('submit', async e => {
 async function route(force = false) {
   await flush();
   closeModals();
+  // Возврат по ссылке из письма Supabase: убираем служебные параметры из адреса.
+  if (/^#(error|access_token|type)=/.test(location.hash)) {
+    const q = new URLSearchParams(location.hash.slice(1));
+    history.replaceState(null, '', location.pathname + '#/');
+    if (q.get('error')) {
+      S.view = 'login'; paint();
+      const msg = $('#loginMsg');
+      if (msg) msg.textContent = q.get('error_code') === 'otp_expired'
+        ? 'Ссылка из письма устарела или уже использована. Попробуйте войти; если почта не подтверждена — запросите новое письмо через «Создать аккаунт».'
+        : 'Ошибка входа: ' + (q.get('error_description') || q.get('error'));
+      return;
+    }
+  }
   const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
   try {
     if (parts[0] === 's' && parts[1]) {
